@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff, Crown, LoaderCircle, Lock, Mail, ShieldCheck, Swords } from "lucide-react";
+import { Eye, EyeOff, Crown, LoaderCircle, Lock, Mail, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -49,129 +49,171 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="kingdom-login relative flex min-h-dvh items-center justify-center overflow-hidden px-4 py-12 sm:px-6">
-      <div className="kingdom-aurora" aria-hidden="true" />
-      <div className="kingdom-stars" aria-hidden="true" />
-      <svg
-        aria-hidden="true"
-        className="kingdom-landscape pointer-events-none absolute inset-x-0 bottom-0 h-[43vh] min-h-64 w-full"
-        viewBox="0 0 1440 420"
-        preserveAspectRatio="xMidYMax slice"
-      >
-        <defs>
-          <linearGradient id="kingdom-hill" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0" stopColor="#263b32" />
-            <stop offset="1" stopColor="#101b1a" />
-          </linearGradient>
-          <linearGradient id="kingdom-stone" x1="0" x2="1" y1="0" y2="1">
-            <stop offset="0" stopColor="#705637" />
-            <stop offset="1" stopColor="#30281f" />
-          </linearGradient>
-        </defs>
-        <path d="M0 280 190 198l135 62 185-130 162 103 183-100 174 95 153-68 258 110v150H0Z" fill="#172622" />
-        <path d="M0 326 220 245l210 75 180-126 194 118 200-97 177 91 259-53v167H0Z" fill="url(#kingdom-hill)" />
-        <path d="M0 355c220-70 359-14 532-23 207-11 326-79 505-24 162 50 265 29 403-5v117H0Z" fill="#0d1716" />
-        <g fill="url(#kingdom-stone)" stroke="#b99050" strokeOpacity=".25" strokeWidth="2">
-          <path d="M612 258h42v-65h14v-24h26v24h14v65h16v-94h12v-30h30v30h12v94h19v-70h13v-25h28v25h13v70h17v-52h12v-24h25v24h12v52h42v82H612Z" />
-          <path d="M607 258h317v24H607z" fill="#8c6c40" />
-        </g>
-        <g fill="#e7b85b" opacity=".85">
-          <path d="M675 220h9v16h-9zM741 191h9v16h-9zM824 220h9v16h-9zM883 239h9v16h-9z" />
-        </g>
-        <path d="M0 382h1440v38H0z" fill="#0a1110" opacity=".82" />
-      </svg>
+    <main className="kingdom-login">
+      <section className="kingdom-hero" aria-labelledby="hero-title">
+        <div className="hero-ambient" aria-hidden="true" />
+        <div className="hero-particles" aria-hidden="true"><i /><i /><i /><i /><i /><i /></div>
+        <svg
+          aria-hidden="true"
+          className="hero-landscape"
+          viewBox="0 0 1000 1000"
+          preserveAspectRatio="xMidYMid slice"
+        >
+          <defs>
+            <linearGradient id="sky" x1="0" x2="0" y1="0" y2="1">
+              <stop offset="0" stopColor="#102126" />
+              <stop offset=".58" stopColor="#34433a" />
+              <stop offset="1" stopColor="#c18b4d" />
+            </linearGradient>
+            <radialGradient id="sunset" cx="70%" cy="48%" r="52%">
+              <stop offset="0" stopColor="#f1c874" stopOpacity=".8" />
+              <stop offset=".33" stopColor="#dfa45c" stopOpacity=".25" />
+              <stop offset="1" stopColor="#e5ae61" stopOpacity="0" />
+            </radialGradient>
+            <linearGradient id="keep" x1="0" x2="1" y1="0" y2="1">
+              <stop offset="0" stopColor="#90734d" />
+              <stop offset=".55" stopColor="#554936" />
+              <stop offset="1" stopColor="#282d28" />
+            </linearGradient>
+            <linearGradient id="mountain" x1="0" x2="0" y1="0" y2="1">
+              <stop offset="0" stopColor="#39453b" />
+              <stop offset="1" stopColor="#1b2926" />
+            </linearGradient>
+            <filter id="soft-glow" x="-80%" y="-80%" width="260%" height="260%">
+              <feGaussianBlur stdDeviation="24" />
+            </filter>
+          </defs>
+          <path fill="url(#sky)" d="M0 0h1000v1000H0z" />
+          <path fill="url(#sunset)" d="M0 0h1000v1000H0z" />
+          <circle cx="700" cy="465" r="76" fill="#efc778" opacity=".25" filter="url(#soft-glow)" />
+          <circle cx="700" cy="465" r="35" fill="#f2cf88" opacity=".74" />
+          <path fill="#24332f" opacity=".64" d="m0 520 145-152 103 90 142-194 122 159 116-112 132 134 111-101 129 153v403H0z" />
+          <path fill="url(#mountain)" d="m0 608 170-142 128 91 145-144 119 140 132-117 121 133 123-104 162 115v320H0z" />
+          <path fill="#66705c" opacity=".24" d="m170 466-43 36 47-16 29 22zm273-53-47 48 54-24 34 30zm251-12-38 42 44-19 29 27zm224 19-37 35 44-16 30 27z" />
+          <path fill="#d9bc87" opacity=".24" d="M0 640c173-35 287 34 451 5s309-82 549-12v99H0z" />
+          <g opacity=".45" fill="#f1cc82">
+            <circle cx="120" cy="586" r="3" /><circle cx="247" cy="550" r="2" /><circle cx="832" cy="567" r="3" />
+            <circle cx="916" cy="608" r="2" /><circle cx="530" cy="586" r="2" /><circle cx="391" cy="554" r="2" />
+          </g>
+          <path fill="#28302a" d="M0 710c128-78 223-71 340-20 108 47 198 43 303-5 141-66 234-62 357 7v308H0z" />
+          <path fill="#1d2824" d="M0 782c151-78 257-36 380 5 112 37 213 14 337-38 130-55 195-42 283 4v247H0z" />
+          <g stroke="#ae8a52" strokeOpacity=".48" strokeWidth="3" fill="url(#keep)">
+            <path d="M536 710h45V574h26v-35l35-32 35 32v35h26v136h48V587h23v-39l34-31 34 31v39h23v123h58v130H536z" />
+            <path d="M509 710h477v31H509z" fill="#95764b" />
+            <path d="M625 710V611h91v99m56 0V612h91v98" fill="#202824" />
+            <path d="M647 710v-64q23-35 46 0v64m102 0v-64q23-35 46 0v64" fill="#e8b96b" stroke="none" opacity=".83" />
+            <path d="M599 574h85m107 13h87" fill="none" stroke="#c29a5c" strokeWidth="5" />
+            <path d="M651 486v-58h20v58m132 0v-54h20v54" fill="#806746" />
+          </g>
+          <g fill="#f1c976" opacity=".9">
+            <path d="M671 424h-5v-19h5l8-12 8 12h5v19zM804 429h-5v-19h5l8-12 8 12h5v19z" />
+            <circle cx="615" cy="641" r="4" /><circle cx="890" cy="646" r="4" />
+          </g>
+          <path fill="#111b18" d="M0 858c177-65 276-28 399 11 141 45 244 11 374-29 95-30 153-33 227-13v173H0z" />
+          <path fill="#101715" d="M0 924c161-30 262 18 398 29 174 15 270-54 411-50 74 2 127 18 191 32v65H0z" />
+          <g fill="#0e1715">
+            <path d="m70 802 16-80 16 80h-9v35H79v-35zm808-20 18-92 18 92h-10v45h-16v-45zM180 855l14-66 14 66h-8v32h-12v-32z" />
+          </g>
+        </svg>
+        <div className="hero-shade" aria-hidden="true" />
 
-      <section className="login-content relative z-10 w-full max-w-[450px]">
-        <header className="mb-8 text-center">
-          <div className="login-crest mx-auto mb-5 flex size-[72px] items-center justify-center rounded-[22px]">
-            <Crown className="size-8 text-[#f7d783]" strokeWidth={1.7} aria-hidden="true" />
-          </div>
-          <p className="mb-2 text-[10px] font-semibold tracking-[0.34em] text-[#d1ac64] uppercase">
-            The Kingdom Awaits
-          </p>
-          <h1 className="font-heading text-3xl font-bold tracking-[0.08em] text-[#fff8e8] sm:text-4xl">
-            WELCOME TO <span className="text-[#e4bc68]">JB COC</span>
-          </h1>
-          <p className="mt-3 text-sm tracking-wide text-[#c3c0b4]">
-            Manage Your Clash of Clans Empire.
-          </p>
-        </header>
+        <div className="hero-brand">
+          <div className="hero-brand-mark"><ShieldCheck aria-hidden="true" /></div>
+          <span>JB <b>COC</b><small>THE KINGDOM GATEWAY</small></span>
+        </div>
 
-        <form onSubmit={handleSubmit} className="login-card relative space-y-5 rounded-2xl p-6 sm:p-8">
-          <div className="login-card-rune" aria-hidden="true"><Swords className="size-5" /></div>
-          <div className="mb-1 flex items-center gap-2 text-xs font-medium tracking-[0.12em] text-[#d3bc85] uppercase">
-            <ShieldCheck className="size-4 text-emerald-400" aria-hidden="true" />
-            Secure Admin Access
-          </div>
+        <div className="hero-copy">
+          <p className="hero-eyebrow"><span /> YOUR EMPIRE. YOUR LEGACY.</p>
+          <h1 id="hero-title">BUILD YOUR<br /><span>EMPIRE.</span></h1>
+          <p>Manage your Clash of Clans account business in one powerful dashboard.</p>
+          <div className="hero-rule"><span /><span /><span /></div>
+        </div>
+        <p className="hero-caption"><span /> A KINGDOM BUILT ON STRATEGY</p>
+      </section>
 
-          {error && (
-            <Alert variant="destructive" className="animate-in fade-in slide-in-from-top-2" role="alert">
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
-
-          <div className="space-y-2">
-            <Label htmlFor="email" className="text-[#e8dfca]">Email</Label>
-            <div className="login-field relative">
-              <Mail className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-[#b99b61]" aria-hidden="true" />
-              <Input
-                id="email"
-                type="email"
-                autoComplete="username"
-                placeholder="Admin email"
-                className="h-12 border-0 bg-transparent pr-3 pl-11 text-sm text-[#fff9ec] placeholder:text-[#a59b88] focus-visible:ring-2 focus-visible:ring-[#c9a450]/55"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                disabled={loading}
-                required
-              />
+      <section className="kingdom-auth" aria-labelledby="login-title">
+        <div className="auth-atmosphere" aria-hidden="true" />
+        <div className="login-content">
+          <header className="auth-header">
+            <div className="login-crest">
+              <Crown className="size-7" strokeWidth={1.7} aria-hidden="true" />
             </div>
-          </div>
+            <p className="auth-eyebrow">THE KINGDOM AWAITS</p>
+            <h2 id="login-title">Welcome Back, Chief.</h2>
+            <p className="auth-subtitle">Sign in to manage your JB COC empire.</p>
+          </header>
 
-          <div className="space-y-2">
-            <Label htmlFor="password" className="text-[#e8dfca]">Password</Label>
-            <div className="login-field relative">
-              <Lock className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-[#b99b61]" aria-hidden="true" />
-              <Input
-                id="password"
-                type={showPassword ? "text" : "password"}
-                autoComplete="current-password"
-                placeholder="Enter your password"
-                className="h-12 border-0 bg-transparent pr-12 pl-11 text-sm text-[#fff9ec] placeholder:text-[#a59b88] focus-visible:ring-2 focus-visible:ring-[#c9a450]/55"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                disabled={loading}
-                required
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword((value) => !value)}
-                className="absolute top-1/2 right-2.5 flex size-8 -translate-y-1/2 items-center justify-center rounded-md text-[#c7b991] transition-colors hover:bg-white/5 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#e4bc68]"
-                aria-label={showPassword ? "Hide password" : "Show password"}
-                aria-pressed={showPassword}
-              >
-                {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-              </button>
+          <form onSubmit={handleSubmit} className="login-card">
+            <div className="auth-secure">
+              <ShieldCheck className="size-4" aria-hidden="true" />
+              <span>SECURE ADMIN ACCESS</span>
             </div>
-          </div>
 
-          <Button
-            type="submit"
-            size="lg"
-            className="login-submit mt-2 h-12 w-full text-sm font-bold tracking-[0.08em] text-[#261b0b] uppercase"
-            disabled={loading}
-          >
-            {loading ? (
-              <><LoaderCircle className="size-4 animate-spin" />Entering the Kingdom...</>
-            ) : (
-              <><Crown className="size-4" />Enter The Kingdom</>
+            {error && (
+              <Alert variant="destructive" className="animate-in fade-in slide-in-from-top-2" role="alert">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
             )}
-          </Button>
-        </form>
 
-        <p className="mt-7 text-center text-[10px] font-medium tracking-[0.16em] text-[#b5ad99] uppercase">
-          JB COC — Account Sales Management System
-        </p>
+            <div className="space-y-2">
+              <Label htmlFor="email" className="login-label">Email</Label>
+              <div className="login-field">
+                <Mail className="login-field-icon" aria-hidden="true" />
+                <Input
+                  id="email"
+                  type="email"
+                  autoComplete="username"
+                  placeholder="Enter your email"
+                  className="login-input pr-3 pl-11"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  disabled={loading}
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="password" className="login-label">Password</Label>
+              <div className="login-field">
+                <Lock className="login-field-icon" aria-hidden="true" />
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  autoComplete="current-password"
+                  placeholder="Enter your password"
+                  className="login-input pr-12 pl-11"
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  disabled={loading}
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((value) => !value)}
+                  className="login-password-toggle"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  aria-pressed={showPassword}
+                >
+                  {showPassword ? <EyeOff aria-hidden="true" /> : <Eye aria-hidden="true" />}
+                </button>
+              </div>
+            </div>
+
+            <Button type="submit" size="lg" className="login-submit" disabled={loading}>
+              {loading ? (
+                <><LoaderCircle className="size-4 animate-spin" />Entering the Kingdom...</>
+              ) : (
+                <><Crown className="size-4" />ENTER THE KINGDOM</>
+              )}
+            </Button>
+          </form>
+
+          <footer className="auth-footer">
+            <span />
+            JB COC — Account Sales Management System
+          </footer>
+        </div>
       </section>
     </main>
   );
