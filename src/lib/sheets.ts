@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from "uuid";
 import {
   parseNumber,
 } from "./format";
-import { bulanIndonesia, parseSheetDate } from "./date";
+import { bulanIndonesia, parseSheetDate, sheetDateStringFromISO } from "./date";
 import type { SheetStructure, Transaction, TransactionInput } from "./types";
 
 const DEFAULT_SHEET_ID = "12vUoE2-WTInp6WLJKGEr0hKA2eS4P-FF";
@@ -170,7 +170,7 @@ function parseGvizDate(value: string): string | null {
   const month = Number(match[2]) + 1;
   const day = Number(match[3]);
   if (!year || month < 1 || month > 12 || day < 1 || day > 31) return null;
-  return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+  return parseSheetDate(`${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`);
 }
 
 function parseGvizCell(cell: GvizCell | null | undefined, type: string | undefined): unknown {
@@ -249,7 +249,7 @@ async function readRawSheet(): Promise<RawSheet> {
         spreadsheetId: getSpreadsheetId(),
         range: `'${title}'!A1:ZZ5000`,
         valueRenderOption: "UNFORMATTED_VALUE",
-        dateTimeRenderOption: "FORMATTED_STRING",
+        dateTimeRenderOption: "SERIAL_NUMBER",
       });
       const values = (res.data.values ?? []) as unknown[][];
       return { sheetTitle: title, sheetGid: gid, values };
@@ -463,9 +463,18 @@ async function writeCells(updates: Array<{ row: number; cells: CellUpdate[] }>, 
   for (const update of updates) {
     for (const cell of update.cells) {
       const letter = columnLetter(cell.columnIndex);
+      const isDateColumn =
+        cell.columnIndex === structure.columns.tanggalBeli ||
+        cell.columnIndex === structure.columns.tanggalJual;
+      const value = isDateColumn && typeof cell.value === "string"
+        ? sheetDateStringFromISO(cell.value)
+        : cell.value;
+      if (isDateColumn && typeof cell.value === "string" && value === null) {
+        throw new Error("Tanggal transaksi tidak valid.");
+      }
       data.push({
         range: `'${structure.sheetTitle}'!${letter}${update.row}`,
-        values: [[cell.value ?? ""]],
+        values: [[value ?? ""]],
       });
     }
   }

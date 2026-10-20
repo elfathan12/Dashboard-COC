@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff, Gamepad2, LoaderCircle, Lock, Mail, LogIn } from "lucide-react";
+import { Eye, EyeOff, Crown, LoaderCircle, Lock, Mail, ShieldCheck, Swords } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -49,46 +49,77 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="relative flex min-h-dvh items-center justify-center overflow-hidden px-4 py-10">
-      <div className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute top-[-20%] left-1/2 size-[500px] -translate-x-1/2 rounded-full bg-violet-600/20 blur-[120px]" />
-        <div className="absolute bottom-[-25%] right-[-10%] size-[420px] rounded-full bg-fuchsia-600/10 blur-[120px]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,var(--background)_75%)]" />
-      </div>
+    <main className="kingdom-login relative flex min-h-dvh items-center justify-center overflow-hidden px-4 py-12 sm:px-6">
+      <div className="kingdom-aurora" aria-hidden="true" />
+      <div className="kingdom-stars" aria-hidden="true" />
+      <svg
+        aria-hidden="true"
+        className="kingdom-landscape pointer-events-none absolute inset-x-0 bottom-0 h-[43vh] min-h-64 w-full"
+        viewBox="0 0 1440 420"
+        preserveAspectRatio="xMidYMax slice"
+      >
+        <defs>
+          <linearGradient id="kingdom-hill" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0" stopColor="#263b32" />
+            <stop offset="1" stopColor="#101b1a" />
+          </linearGradient>
+          <linearGradient id="kingdom-stone" x1="0" x2="1" y1="0" y2="1">
+            <stop offset="0" stopColor="#705637" />
+            <stop offset="1" stopColor="#30281f" />
+          </linearGradient>
+        </defs>
+        <path d="M0 280 190 198l135 62 185-130 162 103 183-100 174 95 153-68 258 110v150H0Z" fill="#172622" />
+        <path d="M0 326 220 245l210 75 180-126 194 118 200-97 177 91 259-53v167H0Z" fill="url(#kingdom-hill)" />
+        <path d="M0 355c220-70 359-14 532-23 207-11 326-79 505-24 162 50 265 29 403-5v117H0Z" fill="#0d1716" />
+        <g fill="url(#kingdom-stone)" stroke="#b99050" strokeOpacity=".25" strokeWidth="2">
+          <path d="M612 258h42v-65h14v-24h26v24h14v65h16v-94h12v-30h30v30h12v94h19v-70h13v-25h28v25h13v70h17v-52h12v-24h25v24h12v52h42v82H612Z" />
+          <path d="M607 258h317v24H607z" fill="#8c6c40" />
+        </g>
+        <g fill="#e7b85b" opacity=".85">
+          <path d="M675 220h9v16h-9zM741 191h9v16h-9zM824 220h9v16h-9zM883 239h9v16h-9z" />
+        </g>
+        <path d="M0 382h1440v38H0z" fill="#0a1110" opacity=".82" />
+      </svg>
 
-      <div className="w-full max-w-md">
-        <div className="mb-8 flex flex-col items-center gap-3 text-center">
-          <div className="flex size-14 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 to-fuchsia-600 shadow-xl shadow-violet-500/30">
-            <Gamepad2 className="size-7 text-white" />
+      <section className="login-content relative z-10 w-full max-w-[450px]">
+        <header className="mb-8 text-center">
+          <div className="login-crest mx-auto mb-5 flex size-[72px] items-center justify-center rounded-[22px]">
+            <Crown className="size-8 text-[#f7d783]" strokeWidth={1.7} aria-hidden="true" />
           </div>
-          <div className="space-y-1">
-            <h1 className="text-2xl font-semibold tracking-tight">JB COC Dashboard</h1>
-            <p className="text-sm text-muted-foreground">
-              Masuk untuk mengelola penjualan akun Clash of Clans
-            </p>
-          </div>
-        </div>
+          <p className="mb-2 text-[10px] font-semibold tracking-[0.34em] text-[#d1ac64] uppercase">
+            The Kingdom Awaits
+          </p>
+          <h1 className="font-heading text-3xl font-bold tracking-[0.08em] text-[#fff8e8] sm:text-4xl">
+            WELCOME TO <span className="text-[#e4bc68]">JB COC</span>
+          </h1>
+          <p className="mt-3 text-sm tracking-wide text-[#c3c0b4]">
+            Manage Your Clash of Clans Empire.
+          </p>
+        </header>
 
-        <form
-          onSubmit={handleSubmit}
-          className="space-y-5 rounded-2xl border border-white/5 bg-card/80 p-6 shadow-2xl shadow-black/40 backdrop-blur-xl"
-        >
+        <form onSubmit={handleSubmit} className="login-card relative space-y-5 rounded-2xl p-6 sm:p-8">
+          <div className="login-card-rune" aria-hidden="true"><Swords className="size-5" /></div>
+          <div className="mb-1 flex items-center gap-2 text-xs font-medium tracking-[0.12em] text-[#d3bc85] uppercase">
+            <ShieldCheck className="size-4 text-emerald-400" aria-hidden="true" />
+            Secure Admin Access
+          </div>
+
           {error && (
-            <Alert variant="destructive" className="animate-in fade-in slide-in-from-top-2">
+            <Alert variant="destructive" className="animate-in fade-in slide-in-from-top-2" role="alert">
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="email">Email Admin</Label>
-            <div className="relative">
-              <Mail className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Label htmlFor="email" className="text-[#e8dfca]">Email</Label>
+            <div className="login-field relative">
+              <Mail className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-[#b99b61]" aria-hidden="true" />
               <Input
                 id="email"
                 type="email"
                 autoComplete="username"
-                placeholder="admin@jbcoc.id"
-                className="h-10 pl-9"
+                placeholder="Admin email"
+                className="h-12 border-0 bg-transparent pr-3 pl-11 text-sm text-[#fff9ec] placeholder:text-[#a59b88] focus-visible:ring-2 focus-visible:ring-[#c9a450]/55"
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
                 disabled={loading}
@@ -98,15 +129,15 @@ export default function LoginPage() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
-            <div className="relative">
-              <Lock className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Label htmlFor="password" className="text-[#e8dfca]">Password</Label>
+            <div className="login-field relative">
+              <Lock className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-[#b99b61]" aria-hidden="true" />
               <Input
                 id="password"
                 type={showPassword ? "text" : "password"}
                 autoComplete="current-password"
-                placeholder="••••••••"
-                className="h-10 pr-10 pl-9"
+                placeholder="Enter your password"
+                className="h-12 border-0 bg-transparent pr-12 pl-11 text-sm text-[#fff9ec] placeholder:text-[#a59b88] focus-visible:ring-2 focus-visible:ring-[#c9a450]/55"
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
                 disabled={loading}
@@ -115,33 +146,33 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={() => setShowPassword((value) => !value)}
-                className="absolute top-1/2 right-2 -translate-y-1/2 rounded-md p-1.5 text-muted-foreground transition-colors hover:text-foreground"
-                aria-label={showPassword ? "Sembunyikan password" : "Tampilkan password"}
+                className="absolute top-1/2 right-2.5 flex size-8 -translate-y-1/2 items-center justify-center rounded-md text-[#c7b991] transition-colors hover:bg-white/5 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#e4bc68]"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                aria-pressed={showPassword}
               >
                 {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
               </button>
             </div>
           </div>
 
-          <Button type="submit" size="lg" className="h-10 w-full" disabled={loading}>
+          <Button
+            type="submit"
+            size="lg"
+            className="login-submit mt-2 h-12 w-full text-sm font-bold tracking-[0.08em] text-[#261b0b] uppercase"
+            disabled={loading}
+          >
             {loading ? (
-              <>
-                <LoaderCircle className="size-4 animate-spin" />
-                Memproses...
-              </>
+              <><LoaderCircle className="size-4 animate-spin" />Entering the Kingdom...</>
             ) : (
-              <>
-                <LogIn className="size-4" />
-                Masuk ke Dashboard
-              </>
+              <><Crown className="size-4" />Enter The Kingdom</>
             )}
           </Button>
         </form>
 
-        <p className="mt-6 text-center text-xs text-muted-foreground">
-          Data penjualan tersimpan aman di Google Sheets pribadi Anda.
+        <p className="mt-7 text-center text-[10px] font-medium tracking-[0.16em] text-[#b5ad99] uppercase">
+          JB COC — Account Sales Management System
         </p>
-      </div>
-    </div>
+      </section>
+    </main>
   );
 }
