@@ -127,21 +127,25 @@ export function DashboardView() {
             />
             <StatCard
               label="Potensi Profit"
-              value="—"
-              muted
-              hint="Tidak ditampilkan"
+              value={stats.potensiProfitAvailable && stats.potensiProfit !== null
+                ? formatRupiah(stats.potensiProfit)
+                : "—"}
+              muted={!stats.potensiProfitAvailable || stats.potensiProfit === null}
+              hint={`Estimasi terisi ${stats.estimasiTerisi} dari ${stats.estimasiTotal} akun belum laku`}
               icon={ChartBar}
-              tone="neutral"
-              tooltip="Potensi Profit disembunyikan sesuai permintaan."
+              tone="emerald"
+              tooltip="Perkiraan keuntungan dari akun yang belum laku: estimasi harga jual pada spreadsheet dikurangi harga modal. Jika estimasi kosong, perhitungan memakai estimasi default 20% di atas modal."
             />
             <StatCard
               label="Proyeksi Total Laba"
-              value="—"
-              muted
-              hint="Tidak ditampilkan"
+              value={stats.proyeksiAvailable && stats.proyeksiTotalLaba !== null
+                ? formatRupiah(stats.proyeksiTotalLaba)
+                : "—"}
+              muted={!stats.proyeksiAvailable || stats.proyeksiTotalLaba === null}
+              hint="Laba terealisasi + potensi profit akun belum laku"
               icon={ChartLine}
-              tone="neutral"
-              tooltip="Proyeksi Total Laba disembunyikan sesuai permintaan."
+              tone="violet"
+              tooltip="Proyeksi laba keseluruhan jika seluruh akun yang belum laku terjual sesuai estimasi harga jual."
             />
           </div>
 
