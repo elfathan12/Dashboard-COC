@@ -50,7 +50,7 @@ export function TransactionDialog({
           </DialogTitle>
           <DialogDescription>
             {isEdit
-              ? "Perbarui data transaksi akun Clash of Clans ini."
+              ? "Perbarui data transaksi akun Clash of Clans atau Mobile Legends ini."
               : "Catat pembelian akun baru. Kosongkan harga jual jika akun belum terjual."}
           </DialogDescription>
         </DialogHeader>

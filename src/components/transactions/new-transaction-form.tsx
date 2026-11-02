@@ -11,6 +11,7 @@ import { PageHeader } from "@/components/page-header";
 import { TransactionForm } from "@/components/transactions/transaction-form";
 import { apiFetch, ApiRequestError } from "@/lib/client-api";
 import { formatRupiah } from "@/lib/format";
+import { accountDisplayLabel } from "@/lib/account";
 import type { Transaction, TransactionInput } from "@/lib/types";
 
 export function NewTransactionForm() {
@@ -41,7 +42,7 @@ export function NewTransactionForm() {
     <div className="space-y-6">
       <PageHeader
         title="Tambah Akun Baru"
-        description="Catat pembelian akun Clash of Clans. Data akan langsung tersimpan ke Google Sheets."
+        description="Catat pembelian akun Clash of Clans atau Mobile Legends. Data akan langsung tersimpan ke Google Sheets."
         actions={
           <Button variant="outline" nativeButton={false} render={<Link href="/transactions" />}>
             <ArrowLeft className="size-4" />
@@ -74,7 +75,7 @@ export function NewTransactionForm() {
               <CircleCheck />
               <AlertTitle>Berhasil disimpan</AlertTitle>
               <AlertDescription className="text-emerald-300/80">
-                {lastSaved.th} · {lastSaved.deskripsi} telah ditambahkan (modal{" "}
+                {accountDisplayLabel(lastSaved.th)} · {lastSaved.deskripsi} telah ditambahkan (modal{" "}
                 {formatRupiah(lastSaved.hargaModal)}).
               </AlertDescription>
             </Alert>

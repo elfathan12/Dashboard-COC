@@ -50,7 +50,15 @@ import { DeleteTransactionDialog } from "@/components/transactions/delete-transa
 import { TransactionDetailSheet } from "@/components/transactions/transaction-detail-sheet";
 import { useApiData } from "@/hooks/use-api-data";
 import { formatRupiah } from "@/lib/format";
-import { formatTanggalID, monthKey, formatMonthKey } from "@/lib/date";
+import { formatTanggalID, formatMonthKey } from "@/lib/date";
+import {
+  ACCOUNT_FILTER_OPTIONS,
+  accountDisplayLabel,
+  accountSortValue,
+  matchesAccountFilter,
+  parseAccountFilter,
+} from "@/lib/account";
+import { transactionMonthKey } from "@/lib/transaction-utils";
 import { exportToCsv, exportToXlsx, TRANSACTION_HEADERS, transactionToRow } from "@/lib/export";
 import type { Transaction } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -59,11 +67,6 @@ type StatusFilter = "all" | "sold" | "unsold";
 type SortKey = "tanggalBeli" | "hargaModal" | "keuntungan" | "th";
 type SortDir = "asc" | "desc";
 const PAGE_SIZE = 10;
-
-const TH_OPTIONS = Array.from({ length: 18 }, (_, index) => ({
-  value: String(index + 1),
-  label: `TH${index + 1}`,
-}));
 
 interface TransactionsResponse {
   transactions: Transaction[];
@@ -116,10 +119,10 @@ export function TransactionsView({ variant = "all" }: { variant?: "all" | "stock
     setPage(1);
   };
 
-  const bulanOptions = useMemo(() => {
+  const monthOptions = useMemo(() => {
     const set = new Map<string, string>();
     for (const item of items) {
-      const key = monthKey(item.tanggalJual) || monthKey(item.tanggalBeli);
+      const key = transactionMonthKey(item);
       if (key) set.set(key, formatMonthKey(key, false));
     }
     return Array.from(set.entries())
@@ -129,18 +132,16 @@ export function TransactionsView({ variant = "all" }: { variant?: "all" | "stock
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
+    const filter = parseAccountFilter(th);
     const result = items.filter((item) => {
       if (status !== "all" && item.status !== status) return false;
-      if (th !== "all") {
-        const itemTh = item.th.replace(/\D/g, "");
-        if (itemTh !== th) return false;
-      }
+      if (!matchesAccountFilter(item.th, filter)) return false;
       if (bulan !== "all") {
-        const key = monthKey(item.tanggalJual) || monthKey(item.tanggalBeli);
+        const key = transactionMonthKey(item);
         if (key !== bulan) return false;
       }
       if (q) {
-        const haystack = `${item.deskripsi} ${item.th} ${item.noPenjualan}`.toLowerCase();
+        const haystack = `${item.deskripsi} ${accountDisplayLabel(item.th)} ${item.th} ${item.noPenjualan}`.toLowerCase();
         if (!haystack.includes(q)) return false;
       }
       return true;
@@ -154,9 +155,7 @@ export function TransactionsView({ variant = "all" }: { variant?: "all" | "stock
         case "keuntungan":
           return (profitOf(a) - profitOf(b)) * dir;
         case "th": {
-          const aNum = Number(a.th.replace(/\D/g, "")) || 0;
-          const bNum = Number(b.th.replace(/\D/g, "")) || 0;
-          return (aNum - bNum) * dir;
+          return (accountSortValue(a.th) - accountSortValue(b.th)) * dir || a.th.localeCompare(b.th);
         }
         case "tanggalBeli":
         default: {
@@ -231,8 +230,8 @@ export function TransactionsView({ variant = "all" }: { variant?: "all" | "stock
         title={isStock ? "Stok Belum Laku" : "Semua Transaksi"}
         description={
           isStock
-            ? "Daftar akun Clash of Clans yang masih tersedia dan belum terjual."
-            : "Kelola seluruh data pembelian dan penjualan akun Clash of Clans Anda."
+            ? "Daftar akun Clash of Clans dan Mobile Legends yang masih tersedia dan belum terjual."
+            : "Kelola seluruh data pembelian dan penjualan akun Clash of Clans dan Mobile Legends."
         }
         actions={
           <>
@@ -283,7 +282,7 @@ export function TransactionsView({ variant = "all" }: { variant?: "all" | "stock
           <div className="relative flex-1">
             <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              placeholder="Cari deskripsi, TH, atau no penjualan..."
+              placeholder="Cari deskripsi, TH, game, atau no penjualan..."
               value={query}
               onChange={(event) => updateQuery(event.target.value)}
               className="h-10 pl-9"
@@ -305,14 +304,14 @@ export function TransactionsView({ variant = "all" }: { variant?: "all" | "stock
             <NativeSelect
               value={th}
               onChange={updateTh}
-              className="w-32"
-              options={[{ value: "all", label: "Semua TH" }, ...TH_OPTIONS]}
+              className="w-44"
+              options={ACCOUNT_FILTER_OPTIONS}
             />
             <NativeSelect
               value={bulan}
               onChange={updateBulan}
               className="w-40"
-              options={[{ value: "all", label: "Semua Bulan" }, ...bulanOptions]}
+              options={[{ value: "all", label: "Semua Bulan" }, ...monthOptions]}
             />
           </div>
         </div>
@@ -354,7 +353,7 @@ export function TransactionsView({ variant = "all" }: { variant?: "all" | "stock
                       className="inline-flex items-center gap-1.5 transition-colors hover:text-foreground"
                       onClick={() => toggleSort("th")}
                     >
-                      TH <SortIndicator active={sortKey === "th"} dir={sortDir} />
+                      TH / Game <SortIndicator active={sortKey === "th"} dir={sortDir} />
                     </button>
                   </TableHead>
                   <TableHead>Deskripsi</TableHead>
@@ -402,7 +401,7 @@ export function TransactionsView({ variant = "all" }: { variant?: "all" | "stock
                           variant="outline"
                           className="border-violet-500/20 bg-violet-500/10 text-violet-300"
                         >
-                          {transaction.th}
+                          {accountDisplayLabel(transaction.th)}
                         </Badge>
                       </TableCell>
                       <TableCell className="max-w-[260px]">

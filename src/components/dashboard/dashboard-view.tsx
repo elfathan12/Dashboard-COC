@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import {
   ChartBar,
@@ -26,21 +27,100 @@ import { EmptyState } from "@/components/empty-state";
 import { MonthlyChart } from "@/components/charts/monthly-chart";
 import { StatusChart } from "@/components/charts/status-chart";
 import { ThChart } from "@/components/charts/th-chart";
+import { NativeSelect } from "@/components/native-select";
 import { useApiData } from "@/hooks/use-api-data";
 import { formatNumber, formatRupiah } from "@/lib/format";
 import { formatTanggalID } from "@/lib/date";
+import { ACCOUNT_FILTER_OPTIONS, accountDisplayLabel } from "@/lib/account";
 import type { DashboardStats } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
+interface StatsResponse {
+  stats: DashboardStats;
+  periods: string[];
+}
+
+const MONTH_OPTIONS = [
+  { value: "01", label: "Januari" },
+  { value: "02", label: "Februari" },
+  { value: "03", label: "Maret" },
+  { value: "04", label: "April" },
+  { value: "05", label: "Mei" },
+  { value: "06", label: "Juni" },
+  { value: "07", label: "Juli" },
+  { value: "08", label: "Agustus" },
+  { value: "09", label: "September" },
+  { value: "10", label: "Oktober" },
+  { value: "11", label: "November" },
+  { value: "12", label: "Desember" },
+];
+
 export function DashboardView() {
-  const { data, loading, error, reload } = useApiData<{ stats: DashboardStats }>("/api/stats");
+  const [accountFilter, setAccountFilter] = useState("all");
+  const [periodMode, setPeriodMode] = useState<"all" | "month">("all");
+  const [periodMonth, setPeriodMonth] = useState("01");
+  const [periodYear, setPeriodYear] = useState("");
+
+  const handlePeriodModeChange = (value: "all" | "month") => {
+    setPeriodMode(value);
+    if (value === "month" && !periodYear) {
+      const now = new Date();
+      setPeriodMonth(String(now.getMonth() + 1).padStart(2, "0"));
+      setPeriodYear(String(now.getFullYear()));
+    }
+  };
+
+  const statsUrl = useMemo(() => {
+    const params = new URLSearchParams();
+    if (accountFilter !== "all") params.set("account", accountFilter);
+    if (periodMode === "month" && periodYear) {
+      params.set("period", `${periodYear}-${periodMonth}`);
+    }
+    const query = params.toString();
+    return query ? `/api/stats?${query}` : "/api/stats";
+  }, [accountFilter, periodMode, periodMonth, periodYear]);
+
+  const { data, loading, error, reload } = useApiData<StatsResponse>(statsUrl);
   const stats = data?.stats;
+
+  const yearOptions = useMemo(() => {
+    const years = new Set<string>((data?.periods ?? []).map((period) => period.slice(0, 4)));
+    years.add(periodYear);
+    return Array.from(years)
+      .filter(Boolean)
+      .sort((a, b) => b.localeCompare(a))
+      .map((value) => ({ value, label: value }));
+  }, [data?.periods, periodYear]);
+
+  const selectedAccountLabel =
+    ACCOUNT_FILTER_OPTIONS.find((option) => option.value === accountFilter)?.label ?? "Semua Game";
+
+  const distributionMeta = useMemo(() => {
+    if (accountFilter === "all") {
+      return {
+        title: "Distribusi Jenis Akun",
+        description: "Jumlah akun COC dan Mobile Legends",
+      };
+    }
+    if (accountFilter === "ml") {
+      return {
+        title: "Distribusi Akun Mobile Legends",
+        description: "Berdasarkan rank/spesifikasi pada deskripsi akun",
+      };
+    }
+    return {
+      title: "Distribusi Town Hall",
+      description: `Jumlah akun ${selectedAccountLabel} yang terjual dan belum laku`,
+    };
+  }, [accountFilter, selectedAccountLabel]);
+
+  const hasActiveFilter = accountFilter !== "all" || periodMode === "month";
 
   return (
     <div className="space-y-6">
       <PageHeader
         title="Dashboard Penjualan"
-        description="Ringkasan performa penjualan akun Clash of Clans Anda secara real-time dari Google Sheets."
+        description="Ringkasan performa penjualan akun Clash of Clans dan Mobile Legends secara real-time dari Google Sheets."
         actions={
           <>
             <Button variant="outline" onClick={() => void reload()} disabled={loading}>
@@ -54,6 +134,64 @@ export function DashboardView() {
           </>
         }
       />
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <ListFilter className="size-4 text-violet-400" />
+            Filter Dashboard
+          </CardTitle>
+          <CardDescription>
+            Pilih jenis akun dan periode penjualan. Seluruh kartu, grafik, dan transaksi
+            terbaru akan mengikuti filter ini.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-wrap items-end gap-3">
+          <div className="space-y-1.5">
+            <p className="text-xs text-muted-foreground">Jenis Akun</p>
+            <NativeSelect
+              value={accountFilter}
+              onChange={setAccountFilter}
+              className="w-52"
+              options={ACCOUNT_FILTER_OPTIONS}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <p className="text-xs text-muted-foreground">Periode</p>
+            <NativeSelect
+              value={periodMode}
+              onChange={(value) => handlePeriodModeChange(value as "all" | "month")}
+              className="w-44"
+              options={[
+                { value: "all", label: "Semua Waktu" },
+                { value: "month", label: "Bulan Tertentu" },
+              ]}
+            />
+          </div>
+          {periodMode === "month" && (
+            <>
+              <div className="space-y-1.5">
+                <p className="text-xs text-muted-foreground">Bulan</p>
+                <NativeSelect
+                  value={periodMonth}
+                  onChange={setPeriodMonth}
+                  className="w-36"
+                  options={MONTH_OPTIONS}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <p className="text-xs text-muted-foreground">Tahun</p>
+                <NativeSelect
+                  value={periodYear}
+                  onChange={setPeriodYear}
+                  className="w-28"
+                  options={yearOptions}
+                />
+              </div>
+            </>
+          )}
+        </CardContent>
+      </Card>
 
       {loading && !stats ? (
         <>
@@ -152,8 +290,16 @@ export function DashboardView() {
           {stats.totalTransaksi === 0 ? (
             <EmptyState
               icon={PackageOpen}
-              title="Belum ada data penjualan"
-              description="Tambahkan transaksi pertama Anda untuk melihat grafik dan statistik di sini."
+              title={
+                hasActiveFilter
+                  ? "Tidak ada transaksi pada filter ini"
+                  : "Belum ada data penjualan"
+              }
+              description={
+                hasActiveFilter
+                  ? "Coba pilih jenis akun atau periode lain untuk melihat data."
+                  : "Tambahkan transaksi pertama Anda untuk melihat grafik dan statistik di sini."
+              }
               action={
                 <Button nativeButton={false} render={<Link href="/transactions/new" />}>
                   <Plus className="size-4" />
@@ -167,7 +313,9 @@ export function DashboardView() {
                 <Card className="lg:col-span-2">
                   <CardHeader>
                     <CardTitle>Penjualan & Modal per Bulan</CardTitle>
-                    <CardDescription>12 bulan terakhir berdasarkan tanggal transaksi</CardDescription>
+                    <CardDescription>
+                      12 bulan terakhir berdasarkan tanggal beli/jual sesuai filter
+                    </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <MonthlyChart data={stats.monthly} />
@@ -188,8 +336,8 @@ export function DashboardView() {
               <div className="grid gap-4 lg:grid-cols-3">
                 <Card className="lg:col-span-2">
                   <CardHeader>
-                    <CardTitle>Distribusi Town Hall</CardTitle>
-                    <CardDescription>Jumlah akun terjual dan belum laku per TH</CardDescription>
+                    <CardTitle>{distributionMeta.title}</CardTitle>
+                    <CardDescription>{distributionMeta.description}</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <ThChart data={stats.byTh} />
@@ -199,7 +347,7 @@ export function DashboardView() {
                 <Card>
                   <CardHeader>
                     <CardTitle>Transaksi Terbaru</CardTitle>
-                    <CardDescription>6 aktivitas terakhir</CardDescription>
+                    <CardDescription>6 aktivitas terakhir sesuai filter</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-1">
                     {stats.recent.length === 0 ? (
@@ -217,7 +365,7 @@ export function DashboardView() {
                           >
                             <div className="min-w-0">
                               <p className="truncate text-sm font-medium">
-                                {transaction.th} · {transaction.deskripsi}
+                                {accountDisplayLabel(transaction.th)} · {transaction.deskripsi}
                               </p>
                               <p className="text-xs text-muted-foreground">
                                 {formatTanggalID(

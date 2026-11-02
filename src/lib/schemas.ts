@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isMobileLegends, normalizeAccountValue, townHallNumber } from "./account";
 
 const optionalDate = z
   .string()
@@ -22,11 +23,12 @@ export const transactionInputSchema = z
     th: z
       .string()
       .trim()
-      .min(1, "Town Hall wajib dipilih")
-      .refine((value) => {
-        const num = Number(String(value).replace(/\D/g, ""));
-        return num >= 1 && num <= 18;
-      }, "Town Hall harus antara 1 sampai 18"),
+      .min(1, "Jenis akun wajib dipilih")
+      .refine(
+        (value) => isMobileLegends(value) || townHallNumber(value) !== null,
+        "Pilih Town Hall 1-18 atau Mobile Legends",
+      )
+      .transform((value) => normalizeAccountValue(value)),
     deskripsi: z.string().trim().min(1, "Deskripsi akun wajib diisi").max(500),
     tanggalBeli: optionalDate,
     tanggalJual: optionalDate,

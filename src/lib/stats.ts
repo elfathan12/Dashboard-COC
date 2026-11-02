@@ -1,25 +1,52 @@
-import { formatMonthKey, monthKey } from "./date";
+import { formatMonthKey } from "./date";
+import {
+  accountDistributionLabel,
+  accountSortValue,
+  matchesAccountFilter,
+  type AccountFilter,
+  type DistributionMode,
+} from "./account";
+import { transactionDate, transactionMonthKey } from "./transaction-utils";
 import type { DashboardStats, MonthlyPoint, ThPoint, Transaction } from "./types";
 
 function sum(values: number[]): number {
   return values.reduce((acc, value) => acc + value, 0);
 }
 
-function normalizeTh(value: string): string {
-  const num = Number(String(value).replace(/[^0-9]/g, ""));
-  if (Number.isFinite(num) && num > 0) return `TH${num}`;
-  return value?.trim() || "Tanpa TH";
+export interface DashboardStatsOptions {
+  distributionMode?: DistributionMode;
 }
 
-function thSortValue(th: string): number {
-  const num = Number(String(th).replace(/[^0-9]/g, ""));
-  return Number.isFinite(num) ? num : 999;
+export function filterTransactions(
+  transactions: Transaction[],
+  filter: AccountFilter,
+  periodKey: string | null,
+): Transaction[] {
+  return transactions.filter((transaction) => {
+    if (!matchesAccountFilter(transaction.th, filter)) return false;
+    if (periodKey && transactionMonthKey(transaction) !== periodKey) return false;
+    return true;
+  });
 }
 
-export function computeDashboardStats(transactions: Transaction[]): DashboardStats {
+export function availablePeriodKeys(transactions: Transaction[]): string[] {
+  const keys = new Set<string>();
+  for (const transaction of transactions) {
+    const key = transactionMonthKey(transaction);
+    if (key) keys.add(key);
+  }
+  return Array.from(keys).sort((a, b) => b.localeCompare(a));
+}
+
+export function computeDashboardStats(
+  transactions: Transaction[],
+  options: DashboardStatsOptions = {},
+): DashboardStats {
+  const distributionMode = options.distributionMode ?? "th";
+
   const totalModal = sum(transactions.map((t) => t.hargaModal ?? 0));
   const totalPenjualan = sum(transactions.map((t) => t.hargaJual ?? 0));
-  /** Selisih kas = Total Penjualan − Total Modal, mencakup semua akun (termasuk yang belum laku). */
+  /** Selisih kas = Total Penjualan - Total Modal, mencakup semua akun (termasuk yang belum laku). */
   const selisihKas = totalPenjualan - totalModal;
 
   const sold = transactions.filter((t) => t.status === "sold");
@@ -32,9 +59,9 @@ export function computeDashboardStats(transactions: Transaction[]): DashboardSta
   /** Modal tertahan = modal pada seluruh akun yang belum laku. */
   const modalTertahan = sum(unsold.map((t) => t.hargaModal ?? 0));
 
-  /** Potensi profit = SUM(Estimasi Harga Jual Efektif − Harga Modal) hanya untuk transaksi belum laku.
-   * Estimasi Efektif: jika Estimasi Harga Jual terisi (kolom J) → pakai manual (bisa < modal).
-   * Jika kosong → estimasi default = Harga Modal × 1.20 (markup 20% keuntungan).
+  /**
+   * Potensi profit = SUM(Estimasi Harga Jual Efektif - Harga Modal) hanya untuk
+   * transaksi belum laku. Jika estimasi kosong, pakai default modal x 1.20.
    */
   const potensiProfit = sum(
     unsold.map((t) => {
@@ -50,13 +77,12 @@ export function computeDashboardStats(transactions: Transaction[]): DashboardSta
   const estimasiTerisi = unsold.filter((t) => t.estimasiHargaJual !== null).length;
   const estimasiTotal = unsold.length;
 
-  /** Proyeksi total laba = Laba Terealisasi + Potensi Profit (dengan estimasi default 20% dari modal). */
-  const proyeksiAvailable = true;
+  /** Proyeksi total laba = Laba Terealisasi + Potensi Profit. */
   const proyeksiTotalLaba = labaTerealisasi + (potensiProfit ?? 0);
 
   const monthMap = new Map<string, MonthlyPoint>();
   for (const t of transactions) {
-    const key = monthKey(t.tanggalJual) || monthKey(t.tanggalBeli);
+    const key = transactionMonthKey(t);
     if (!key) continue;
     const point =
       monthMap.get(key) ??
@@ -87,9 +113,10 @@ export function computeDashboardStats(transactions: Transaction[]): DashboardSta
 
   const thMap = new Map<string, ThPoint>();
   for (const t of transactions) {
-    const th = normalizeTh(t.th);
+    const label = accountDistributionLabel(t, distributionMode);
     const point =
-      thMap.get(th) ?? ({ th, terjual: 0, belumLaku: 0, modal: 0, penjualan: 0, laba: 0 } satisfies ThPoint);
+      thMap.get(label) ??
+      ({ th: label, terjual: 0, belumLaku: 0, modal: 0, penjualan: 0, laba: 0 } satisfies ThPoint);
 
     point.modal += t.hargaModal ?? 0;
     if (t.status === "sold") {
@@ -99,10 +126,17 @@ export function computeDashboardStats(transactions: Transaction[]): DashboardSta
     } else {
       point.belumLaku += 1;
     }
-    thMap.set(th, point);
+    thMap.set(label, point);
   }
 
-  const byTh = Array.from(thMap.values()).sort((a, b) => thSortValue(a.th) - thSortValue(b.th));
+  const byTh = Array.from(thMap.values()).sort((a, b) => {
+    if (distributionMode === "ml") {
+      const countDiff = b.terjual + b.belumLaku - (a.terjual + a.belumLaku);
+      if (countDiff !== 0) return countDiff;
+      return a.th.localeCompare(b.th);
+    }
+    return accountSortValue(a.th) - accountSortValue(b.th) || a.th.localeCompare(b.th);
+  });
 
   const statusDistribution = [
     { name: "Terjual", key: "sold", value: sold.length },
@@ -120,8 +154,8 @@ export function computeDashboardStats(transactions: Transaction[]): DashboardSta
 
   const recent = [...transactions]
     .sort((a, b) => {
-      const aDate = a.tanggalBeli ?? a.tanggalJual ?? "";
-      const bDate = b.tanggalBeli ?? b.tanggalJual ?? "";
+      const aDate = transactionDate(a) ?? "";
+      const bDate = transactionDate(b) ?? "";
       return bDate.localeCompare(aDate) || b.row - a.row;
     })
     .slice(0, 6);

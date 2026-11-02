@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { formatRupiah } from "@/lib/format";
+import { accountDisplayLabel } from "@/lib/account";
 import { daysBetween, formatTanggalID } from "@/lib/date";
 import type { Transaction } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -70,7 +71,7 @@ export function TransactionDetailSheet({
               {sold ? "Terjual" : "Belum Laku"}
             </Badge>
             <Badge variant="outline" className="border-violet-500/20 bg-violet-500/10 text-violet-300">
-              TH{transaction.th.replace(/\D/g, "")}
+              {accountDisplayLabel(transaction.th)}
             </Badge>
           </div>
           <SheetTitle className="mt-1.5 text-base leading-snug">{transaction.deskripsi}</SheetTitle>

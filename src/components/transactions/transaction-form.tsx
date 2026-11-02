@@ -11,13 +11,13 @@ import { CurrencyInput } from "@/components/currency-input";
 import { NativeSelect } from "@/components/native-select";
 import { formatRupiah } from "@/lib/format";
 import { transactionInputSchema, type TransactionParsed } from "@/lib/schemas";
+import {
+  ACCOUNT_TYPE_OPTIONS,
+  isMobileLegends,
+  normalizeAccountValue,
+} from "@/lib/account";
 import type { TransactionInput } from "@/lib/types";
 import { cn } from "@/lib/utils";
-
-const TH_OPTIONS = Array.from({ length: 18 }, (_, index) => {
-  const value = String(index + 1);
-  return { value, label: `TH${value}` };
-});
 
 export interface TransactionFormProps {
   defaultValues?: Partial<TransactionInput>;
@@ -39,7 +39,7 @@ interface FormState {
 
 function toState(values?: Partial<TransactionInput>): FormState {
   return {
-    th: values?.th ?? "",
+    th: values?.th ? normalizeAccountValue(values.th) : "",
     deskripsi: values?.deskripsi ?? "",
     tanggalBeli: values?.tanggalBeli ?? "",
     tanggalJual: values?.tanggalJual ?? "",
@@ -111,15 +111,20 @@ export function TransactionForm({
     <form onSubmit={handleSubmit} className={cn("space-y-5", className)}>
       <div className="grid gap-5 sm:grid-cols-2">
         <div className="space-y-2">
-          <Label htmlFor="th">Town Hall *</Label>
+          <Label htmlFor="th">Town Hall / Game *</Label>
           <NativeSelect
             id="th"
             value={form.th}
             onChange={(value) => update("th", value)}
-            options={TH_OPTIONS}
-            placeholder="Pilih TH"
+            options={ACCOUNT_TYPE_OPTIONS}
+            placeholder="Pilih TH atau Mobile Legends"
           />
           {errors.th && <p className="text-xs text-destructive">{errors.th}</p>}
+          {isMobileLegends(form.th) && (
+            <p className="text-xs text-violet-300">
+              Isi level, rank, jumlah hero, dan skin pada Deskripsi Akun.
+            </p>
+          )}
         </div>
 
         <div className="space-y-2">
@@ -143,7 +148,11 @@ export function TransactionForm({
         <Textarea
           id="deskripsi"
           rows={3}
-          placeholder="Contoh: TH13 | Level 200 | Full hero | Skin lengkap"
+          placeholder={
+            isMobileLegends(form.th)
+              ? "Contoh: Level 55 | Mythic Glory | 120 hero | 50 skin"
+              : "Contoh: TH13 | Level 200 | Full hero | Skin lengkap"
+          }
           value={form.deskripsi}
           onChange={(event) => update("deskripsi", event.target.value)}
           aria-invalid={Boolean(errors.deskripsi)}

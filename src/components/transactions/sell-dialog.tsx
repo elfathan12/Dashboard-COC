@@ -16,6 +16,7 @@ import { Label } from "@/components/ui/label";
 import { CurrencyInput } from "@/components/currency-input";
 import { apiFetch, ApiRequestError } from "@/lib/client-api";
 import { formatRupiah } from "@/lib/format";
+import { accountDisplayLabel } from "@/lib/account";
 import { transactionKey } from "@/lib/transaction-utils";
 import { sellInputSchema } from "@/lib/schemas";
 import { todayJakarta } from "@/lib/date";
@@ -40,7 +41,7 @@ export function SellDialog({ open, onOpenChange, transaction, onSold }: SellDial
           </DialogTitle>
           <DialogDescription>
             {transaction
-              ? `${transaction.th} · ${transaction.deskripsi}`
+              ? `${accountDisplayLabel(transaction.th)} · ${transaction.deskripsi}`
               : "Pilih transaksi yang ingin ditandai terjual."}
           </DialogDescription>
         </DialogHeader>

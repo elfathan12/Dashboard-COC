@@ -32,7 +32,9 @@ import { TableSkeleton } from "@/components/loading-skeletons";
 import { EmptyState } from "@/components/empty-state";
 import { useApiData } from "@/hooks/use-api-data";
 import { formatRupiah } from "@/lib/format";
-import { formatTanggalID, formatMonthKey, monthKey, yearOf } from "@/lib/date";
+import { formatTanggalID, formatMonthKey, yearOf } from "@/lib/date";
+import { accountDisplayLabel } from "@/lib/account";
+import { transactionDate, transactionMonthKey } from "@/lib/transaction-utils";
 import { exportToCsv, exportToXlsx, TRANSACTION_HEADERS, transactionToRow } from "@/lib/export";
 import type { Transaction } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -54,7 +56,7 @@ export function ReportsView() {
   const yearOptions = useMemo(() => {
     const set = new Set<string>();
     for (const item of items) {
-      const y = yearOf(item.tanggalJual) || yearOf(item.tanggalBeli);
+      const y = yearOf(transactionDate(item));
       if (y) set.add(y);
     }
     return Array.from(set)
@@ -64,10 +66,10 @@ export function ReportsView() {
 
   const filtered = useMemo(() => {
     return items.filter((item) => {
-      const itemYear = yearOf(item.tanggalJual) || yearOf(item.tanggalBeli);
+      const itemYear = yearOf(transactionDate(item));
       if (year !== "all" && itemYear !== year) return false;
       if (month !== "all") {
-        const key = monthKey(item.tanggalJual) || monthKey(item.tanggalBeli);
+        const key = transactionMonthKey(item);
         if (key.slice(5) !== month) return false;
       }
       if (status !== "all" && item.status !== status) return false;
@@ -256,7 +258,7 @@ export function ReportsView() {
                       <TableCell className="text-xs text-muted-foreground tabular-nums">
                         {transaction.noPenjualan || transaction.row}
                       </TableCell>
-                      <TableCell className="font-medium">{transaction.th}</TableCell>
+                      <TableCell className="font-medium">{accountDisplayLabel(transaction.th)}</TableCell>
                       <TableCell className="max-w-[240px] truncate">{transaction.deskripsi}</TableCell>
                       <TableCell className="text-muted-foreground">
                         {formatTanggalID(transaction.tanggalBeli, true)}

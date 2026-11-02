@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { apiFetch, ApiRequestError } from "@/lib/client-api";
 import { formatRupiah } from "@/lib/format";
+import { accountDisplayLabel } from "@/lib/account";
 import { transactionKey } from "@/lib/transaction-utils";
 import type { Transaction } from "@/lib/types";
 
@@ -67,7 +68,7 @@ export function DeleteTransactionDialog({
               <>
                 {" "}
                 <span className="text-foreground">
-                  {transaction.th} · {transaction.deskripsi}
+                  {accountDisplayLabel(transaction.th)} · {transaction.deskripsi}
                 </span>{" "}
                 ({formatRupiah(transaction.hargaModal)}).
               </>
